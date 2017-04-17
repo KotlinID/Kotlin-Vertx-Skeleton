@@ -1,0 +1,37 @@
+version: "3"
+services:
+  db:
+    container_name: kotlin-mongo
+    hostname: kotlin-mongo
+    image: mongo:3.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - "db-data:/data/db"
+      - "db-config:/data/configdb"
+  api:
+    container_name: kotlin-api
+    hostname: kotlin
+    build: api
+    ports:
+      - "80:20000"
+    links:
+      - "db:db"
+    environment:
+      - HTTP_PORT=20000
+      - MONGODB_HOST=db
+      - MONGODB_PORT=27017
+      - MONGODB_DATABASE=kotlin
+      - IMAGE_LOCATION=/var/image/
+      - BASE_URL=http://kotlin.jasoet.com/
+      - HOSTNAME=kotlin
+    volumes:
+      - "data-log:/var/log/kotlin"
+      - "/var/image/:/var/image"
+volumes:
+  data-log:
+    driver: local
+  db-data:
+    driver: local
+  db-config:
+    driver: local
