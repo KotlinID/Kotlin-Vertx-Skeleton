@@ -6,6 +6,7 @@ import com.mongodb.client.MongoDatabase
 import dagger.Module
 import dagger.Provides
 import io.vertx.core.json.JsonObject
+import org.jasoet.kotlin.extension.JsonObjectConverter
 import org.jasoet.kotlin.extension.count
 import org.jasoet.kotlin.extension.createQuery
 import org.jasoet.kotlin.extension.logger
@@ -13,6 +14,10 @@ import org.jasoet.kotlin.model.Institution
 import org.jasoet.kotlin.model.Location
 import org.mongodb.morphia.Datastore
 import org.mongodb.morphia.Morphia
+import org.mongodb.morphia.converters.SimpleValueConverter
+import org.mongodb.morphia.converters.TypeConverter
+import org.mongodb.morphia.mapping.MappedField
+import org.mongodb.morphia.mapping.Mapper
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -58,7 +63,12 @@ class MongoModule(val config: JsonObject) {
     @Provides
     @Singleton
     fun providesMorphia(): Morphia {
-        return Morphia().apply {
+        val mapper = Mapper().apply {
+            with(converters) {
+                addConverter(JsonObjectConverter())
+            }
+        }
+        return Morphia(mapper).apply {
             mapPackage("com.rumahaplikasi.berdaya.model")
         }
     }

@@ -2,6 +2,7 @@ package org.jasoet.kotlin.model
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
+import io.vertx.core.json.JsonObject
 import org.bson.types.ObjectId
 import org.hibernate.validator.constraints.NotBlank
 import org.mongodb.morphia.annotations.Entity
@@ -25,11 +26,13 @@ class Location() {
     constructor(
         id: ObjectId? = null,
         province: String = "",
-        city: List<String> = emptyList()
+        city: List<String> = emptyList(),
+        obj: JsonObject? = null
     ) : this() {
         this.id = id
         this.province = province
         this.city = city
+        this.obj = obj
     }
 
     @Id
@@ -39,4 +42,6 @@ class Location() {
     var province: String = ""
     @NotBlank
     var city: List<String> = emptyList()
+    @NotBlank
+    var obj: JsonObject? = null
 }
