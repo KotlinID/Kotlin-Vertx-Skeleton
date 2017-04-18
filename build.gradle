@@ -60,6 +60,7 @@ dependencies {
 
     compile "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kaptTest "com.google.dagger:dagger-compiler:$daggerVersion"
 
     compile "org.apache.commons:commons-lang3:${commonsLangVersion}"
     compile "commons-codec:commons-codec:${commonsCodecVersion}"
@@ -108,8 +109,8 @@ compileTestKotlin {
 
 idea {
     module {
-        sourceDirs += file('build/generated/source/kapt/main')
         testSourceDirs += file('build/generated/source/kapt/test')
+        sourceDirs += file('build/generated/source/kapt/main')
     }
 }
 

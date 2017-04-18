@@ -9,6 +9,7 @@ import org.jasoet.kotlin.extension.propertiesConfig
 import org.jasoet.kotlin.extension.retrieveConfig
 import org.jasoet.kotlin.model.Location
 import org.jasoet.kotlin.module.DaggerAppComponent
+import org.jasoet.kotlin.module.DaggerTestAppComponent
 import org.jasoet.kotlin.module.MongoModule
 import org.jasoet.kotlin.module.VertxModule
 import org.junit.Test
@@ -38,12 +39,9 @@ class JsonObjectTest {
                 val (config, _) = it
                 log.info("Initialize Components...")
                 observableCall {
-                    val app = DaggerAppComponent.builder()
-                        .vertxModule(VertxModule(vertx, config))
+                    val app = DaggerTestAppComponent.builder()
                         .mongoModule(MongoModule(config))
                         .build()
-                    val initializer = app.initializer()
-                    initializer()
                     val jsonString = """
                             {
                                 "title": "Person",
