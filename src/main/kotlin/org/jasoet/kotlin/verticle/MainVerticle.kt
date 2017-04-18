@@ -34,14 +34,14 @@ class MainVerticle @Inject constructor(val mainController: MainController) : Abs
 
         httpServer.handle(
             {
-                startFuture.complete()
                 log.info("HttpServer started in port ${config.getInteger("HTTP_PORT")}")
                 log.info("Main Verticle Deployed!")
+                startFuture.complete()
             },
             {
-                startFuture.fail(it)
                 log.error("Failed to start HttpServer. [${it.message}]", it)
                 log.error("Main Verticle Failed to Deploy!")
+                startFuture.fail(it)
             }
         )
     }

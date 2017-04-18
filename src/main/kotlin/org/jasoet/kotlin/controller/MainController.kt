@@ -6,6 +6,7 @@ import io.vertx.ext.web.Router
 import org.jasoet.kotlin.extension.DataInconsistentException
 import org.jasoet.kotlin.extension.NotAllowedException
 import org.jasoet.kotlin.extension.NullObjectException
+import org.jasoet.kotlin.extension.OK
 import org.jasoet.kotlin.extension.RegistrationException
 import org.jasoet.kotlin.extension.endWithJson
 import org.jasoet.kotlin.extension.first
@@ -32,6 +33,10 @@ class MainController @Inject constructor(override val router: Router,
 
     route("/static/*").serveStatic()
     route().last().handler { it.fail(404) }
+
+    get("/").handler { context ->
+        context.OK("Hello World!")
+    }
 
     mountSubRouter("/api/institution/", insitutionController.create())
     mountSubRouter("/api/location/", locationController.create())

@@ -1,23 +1,22 @@
-package org.jasoet.kotlin
+package org.jasoet.kotlin.controller
 
+import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.unit.TestContext
 import io.vertx.ext.unit.junit.VertxUnitRunner
-import org.jasoet.kotlin.extension.getById
 import org.jasoet.kotlin.extension.logger
 import org.jasoet.kotlin.extension.observableCall
 import org.jasoet.kotlin.extension.propertiesConfig
 import org.jasoet.kotlin.extension.retrieveConfig
-import org.jasoet.kotlin.model.Location
 import org.jasoet.kotlin.module.DaggerTestAppComponent
 import org.jasoet.kotlin.module.MongoModule
+import org.jasoet.kotlin.module.VertxModule
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mongodb.morphia.Datastore
-import kotlin.test.assertNotNull
+import java.net.ServerSocket
 import kotlin.test.assertTrue
 
 /**
@@ -25,31 +24,42 @@ import kotlin.test.assertTrue
  *
  * @author Deny Prasetyo
  */
-
 @RunWith(VertxUnitRunner::class)
-class JsonObjectTest {
-    val log = logger(JsonObjectTest::class)
-    lateinit var datastore: Datastore
+class MainControllerTest {
+    val log = logger(MainControllerTest::class)
     lateinit var vertx: Vertx
+    lateinit var sharedConfig: JsonObject
+    var port: Int = 0
 
     @Before
     fun setUp(context: TestContext) {
         log.info("Initialize Components")
+
+        val socket = ServerSocket(0)
+        port = socket.localPort
+        socket.close()
+
         vertx = Vertx.vertx()
         val properties = propertiesConfig("application-config.properties")
         vertx.retrieveConfig(properties)
+            .map { it.put("HTTP_PORT", port) }
             .map { it to vertx }
             .doOnError {
                 log.error("Error Occurred when deploying/retrieving config ${it.message}", it)
             }
             .flatMap {
-                val (config, _) = it
+                val (config, vertx) = it
                 log.info("Initialize Components...")
+                sharedConfig = config
                 observableCall {
                     val app = DaggerTestAppComponent.builder()
+                        .vertxModule(VertxModule(vertx, config))
                         .mongoModule(MongoModule(config))
                         .build()
-                    datastore = app.dataStore()
+                    val deployOption = DeploymentOptions().apply {
+                        this.config = config
+                    }
+                    vertx.deployVerticle(app.mainVerticle(), deployOption, context.asyncAssertSuccess())
                 }
             }
             .doOnError {
@@ -63,35 +73,19 @@ class JsonObjectTest {
     }
 
     @Test
-    fun testInsertAndLoadData(context: TestContext) {
-        val jsonString = """
-                            {
-                                "title": "Person",
-                                "type": "object",
-                                "properties": {
-                                    "firstName": {
-                                        "type": "string"
-                                    },
-                                    "lastName": {
-                                        "type": "string"
-                                    },
-                                    "age": {
-                                        "description": "Age in years",
-                                        "type": "integer",
-                                        "minimum": 0
-                                    }
-                                },
-                                "required": ["firstName", "lastName"]
-                            }
-                            """.trimMargin()
+    fun testSimpleEndpoint(context: TestContext) {
+        val async = context.async()
+        val port = sharedConfig.getInteger("HTTP_PORT")
 
-        val jsonObject = JsonObject(jsonString)
-        val location = Location(province = "DIY", city = listOf("Bantul", "Sleman"), obj = jsonObject)
-        val keyLoc = datastore.save(location)
-        log.info("Save Should be Success")
-        val locationFromDb = datastore.getById<Location>(keyLoc.id)
-        assertNotNull(locationFromDb)
-        log.info("Load Should Success Also")
+        log.info("Request Get to localhost:$port/")
+        vertx.createHttpClient().getNow(port, "localhost", "/") { response ->
+            response.handler { body ->
+                val bodyAsString = body.toString()
+                log.info("Received Body [$bodyAsString]")
+                context.assertTrue(bodyAsString.contains("Hello", ignoreCase = true))
+                async.complete()
+            }
+        }
     }
 
     @After
