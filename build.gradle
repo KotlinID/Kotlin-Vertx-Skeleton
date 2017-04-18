@@ -57,7 +57,6 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
     compile "com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion"
 
-
     compile "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kaptTest "com.google.dagger:dagger-compiler:$daggerVersion"
@@ -79,6 +78,7 @@ dependencies {
     compile("net.logstash.logback:logstash-logback-encoder:${logstashLogbackEncoderVersion}")
     compile("com.papertrailapp:logback-syslog4j:${papertrailLogbackVersion}")
 
+    testCompile "io.vertx:vertx-unit:$vertxVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testCompile "junit:junit:$jUnitVersion"
