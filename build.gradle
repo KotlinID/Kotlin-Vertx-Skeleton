@@ -135,7 +135,7 @@ task docker(type: Zip, dependsOn: 'shadowJar') {
         into "api"
         include '*.jar'
     }
-    archiveName "docker-lawble-kotlin.zip"
+    archiveName "docker-kotlin-api.zip"
     destinationDir new File("$buildDir", 'dist')
 }
 
